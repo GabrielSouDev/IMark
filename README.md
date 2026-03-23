@@ -49,13 +49,18 @@ O projeto é composto por três camadas principais:
 ## 🚀 Como executar
 
 Clone o repositório:
+
+```bash
 git clone https://github.com/GabrielSouDev/IMark.git
 cd IMark
+```
 
 ### Web (Blazor WebAssembly)
+
 dotnet run --project IMark.Web
 
 ### Mobile (Android/iOS)
+
 Abra a solution no Visual Studio, selecione o projeto IMark.App,
 escolha o dispositivo/emulador e execute com F5.
 
