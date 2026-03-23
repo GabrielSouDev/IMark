@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="IMark.App/IMark.App.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+  <Project Path="IMark.Shared/IMark.Shared.csproj" />
+  <Project Path="IMark.Web/IMark.Web.csproj" Id="f47a8203-116a-40b2-877b-85be0e8be8c6" />
+</Solution>
