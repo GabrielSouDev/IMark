@@ -1,0 +1,100 @@
+﻿@page "/Login"
+@inject AuthService AuthService
+@inject JwtAuthStateProvider JwtAuthStateProvider
+
+@inject NavigationManager Navigation
+
+<PageTitle>Login</PageTitle>
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <div class="text-center mb-4">
+            <h4 class="fw-600">Bem-vindo</h4>
+            <p class="text-muted small">Entre com sua conta para continuar</p>
+        </div>
+
+        <EditForm Model="_loginRequest" OnValidSubmit="HandleLogin" class="border p-4 shadow-sm rounded bg-white">
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <label for="email" class="form-label fw-500 small">
+                    Email: <span class="text-danger">*</span>
+                </label>
+                <InputText id="email"
+                           @bind-Value="_loginRequest.Email"
+                           class="form-control"
+                           placeholder="Digite seu email" />
+                <ValidationMessage For="@(() => _loginRequest.Email)" class="text-danger small" />
+            </div>
+
+            <div class="mb-4">
+                <label for="password" class="form-label fw-500 small">
+                    Senha: <span class="text-danger">*</span>
+                </label>
+                <InputText id="password"
+                           @bind-Value="_loginRequest.Password"
+                           type="password"
+                           class="form-control"
+                           placeholder="Digite sua senha" />
+                <ValidationMessage For="@(() => _loginRequest.Password)" class="text-danger small" />
+                <div class="text-end mt-1">
+                    <a href="/account/forgot-password" class="small text-muted">Esqueci minha senha</a>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="alert alert-danger small py-2 mb-3">@_errorMessage</div>
+            }
+
+            <button type="submit" class="btn btn-primary w-100" disabled="@_isLoading">
+                @if (_isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                    <span>Entrando...</span>
+                }
+                else
+                {
+                    <span>Entrar</span>
+                }
+            </button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private LoginRequest _loginRequest = new();
+    private string? _errorMessage;
+    private bool _isLoading = false;
+
+    private async Task HandleLogin()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+
+        try
+        {
+            var sucess = await AuthService.LoginAsync(_loginRequest);
+
+            if(sucess == true)
+            {
+
+                await JwtAuthStateProvider.NotifyLoginAsync();
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                _errorMessage = "Falha ao autenticar. Verifique suas credenciais e tente novamente.";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"{ex}:{ex.Message}");
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}
