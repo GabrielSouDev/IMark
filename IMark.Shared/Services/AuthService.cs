@@ -1,9 +1,6 @@
 ﻿using IMark.Shared.Interfaces;
-using IMark.Shared.Models.Request;
-using System;
-using System.Collections.Generic;
+using IMark.Shared.Models.Requests;
 using System.Net.Http.Json;
-using System.Text;
 
 namespace IMark.Shared.Services;
 

@@ -1,24 +1,24 @@
 ﻿@page "/Login"
 @inject AuthService AuthService
 @inject JwtAuthStateProvider JwtAuthStateProvider
-
 @inject NavigationManager Navigation
 
 <PageTitle>Login</PageTitle>
 
 <div class="row justify-content-center mt-5">
     <div class="col-md-4">
-        <div class="text-center mb-4">
-            <h4 class="fw-600">Bem-vindo</h4>
+        <div class="text-center mb-5">
+            <h2 class="fw-bold text-primary" style="color: #1D4786 !important;">IMark</h2>
+            <p class="fw-semibold">Bem-vindo</p>
             <p class="text-muted small">Entre com sua conta para continuar</p>
         </div>
 
-        <EditForm Model="_loginRequest" OnValidSubmit="HandleLogin" class="border p-4 shadow-sm rounded bg-white">
+        <EditForm Model="_loginRequest" OnValidSubmit="HandleLogin" class="card p-4 shadow-sm rounded">
             <DataAnnotationsValidator />
 
             <div class="mb-3">
-                <label for="email" class="form-label fw-500 small">
-                    Email: <span class="text-danger">*</span>
+                <label for="email" class="form-label fw-semibold small">
+                    Email <span class="text-danger">*</span>
                 </label>
                 <InputText id="email"
                            @bind-Value="_loginRequest.Email"
@@ -27,9 +27,9 @@
                 <ValidationMessage For="@(() => _loginRequest.Email)" class="text-danger small" />
             </div>
 
-            <div class="mb-4">
-                <label for="password" class="form-label fw-500 small">
-                    Senha: <span class="text-danger">*</span>
+            <div class="mb-3">
+                <label for="password" class="form-label fw-semibold small">
+                    Senha <span class="text-danger">*</span>
                 </label>
                 <InputText id="password"
                            @bind-Value="_loginRequest.Password"
@@ -44,13 +44,15 @@
 
             @if (!string.IsNullOrEmpty(_errorMessage))
             {
-                <div class="alert alert-danger small py-2 mb-3">@_errorMessage</div>
+                <div class="alert alert-danger small py-2 mb-3" role="alert">
+                    @_errorMessage
+                </div>
             }
 
-            <button type="submit" class="btn btn-primary w-100" disabled="@_isLoading">
+            <button type="submit" class="btn btn-primary w-100 d-flex justify-content-center align-items-center" disabled="@_isLoading">
                 @if (_isLoading)
                 {
-                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                     <span>Entrando...</span>
                 }
                 else
@@ -74,23 +76,22 @@
 
         try
         {
-            var sucess = await AuthService.LoginAsync(_loginRequest);
+            bool success = await AuthService.LoginAsync(_loginRequest);
 
-            if(sucess == true)
+            if (success)
             {
-
                 await JwtAuthStateProvider.NotifyLoginAsync();
                 Navigation.NavigateTo("/");
             }
             else
             {
-                _errorMessage = "Falha ao autenticar. Verifique suas credenciais e tente novamente.";
+                _errorMessage = "Email ou senha incorretos. Tente novamente.";
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"{ex}:{ex.Message}");
-            _errorMessage = ex.Message;
+            Console.Error.WriteLine($"Login Error: {ex}");
+            _errorMessage = "Ocorreu um erro ao tentar entrar. Tente novamente mais tarde.";
         }
         finally
         {

@@ -31,8 +31,10 @@ namespace IMark.App
 
             builder.Services.AddMauiBlazorWebView();
 
+            builder.Services.AddSingleton<TimeCheckService>();
+
             builder.Services.AddSingleton<ITokenStorage, SecureTokenStorage>();
-            builder.Services.AddSingleton<AuthTokenHandler>();
+            builder.Services.AddTransient<AuthTokenHandler>();
             builder.Services.AddSingleton<AuthService>();
             builder.Services.AddSingleton<AuthenticationStateProvider, JwtAuthStateProvider>();
             builder.Services.AddSingleton<JwtAuthStateProvider>(sp =>

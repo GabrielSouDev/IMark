@@ -1,0 +1,94 @@
+﻿@inject TimeCheckService TimeCheckService
+
+@attribute [Authorize]
+@page "/Incluir"
+@using IMark.Shared.Models.Enums
+
+<div class="d-flex flex-column" >
+
+    <!-- Clock -->
+    <div class="clock-section flex-shrink-0">
+        <small class="clock-label">Horário atual</small>
+        <Timer />
+        <p class="clock-date mb-0">@DateTime.UtcNow.ToLongDateString()</p>
+    </div>
+
+    <!-- Button -->
+    <div class="btn-wrap">
+        <button @onclick="IncludeAsync" class="punch-btn btn-include">
+            <span class="btn-icon">⏱</span>
+            <span>Incluir Registro</span>
+        </button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(_errorMessage))
+    {
+        <div class="alert alert-danger small py-2 mb-3" role="alert">
+            @_errorMessage
+        </div>
+    }
+</div>
+
+<!-- Records table -->
+<div class="records-wrap">
+    <table class="table table-sm align-middle mb-0">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Data</th>
+                <th>Horario</th>
+            </tr>
+        </thead>
+        <tbody id="registros">
+            
+                @if (!_timeEntry.Checks.Any())
+                {
+                    <tr>
+                        <td colspan="3" class="empty-msg">Nenhum ponto registrado</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var (check, index) in _timeEntry.Checks.Select((c, i) => (c, i + 1)))
+                    {
+                        <tr>
+                            <td>@index</td>
+                            <td>@check.Timestamp.ToString("dd/MM/yyyy")</td>
+                            <td>@check.Timestamp.ToString("HH:mm:ss")</td>
+                        </tr>
+                    }
+                }
+        </tbody>
+    </table>
+</div>
+
+@code{
+    private TimeEntryDTO _timeEntry = new();
+    private string _errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _timeEntry = await TimeCheckService.GetTodayAsync();
+    }
+
+    private async Task IncludeAsync()
+    {
+        _errorMessage = string.Empty;
+
+        var request = new TimeCheckRequest(DateTime.UtcNow);
+        try
+        {
+            _timeEntry.Checks.Add(new TimeCheckDTO
+            {
+                Timestamp = request.Timestamp
+            });
+
+            await TimeCheckService.IncludeAsync(request);
+        }
+        catch (Exception ex)
+        {
+            
+            _errorMessage = ex.Message;
+        }
+    }
+}

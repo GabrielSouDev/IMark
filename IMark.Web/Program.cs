@@ -10,15 +10,17 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped<ITokenStorage, LocalStorageTokenStorage>();
-builder.Services.AddScoped<AuthTokenHandler>();
-builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
-builder.Services.AddScoped<JwtAuthStateProvider>(sp =>
+builder.Services.AddScoped<TimeCheckService>();
+
+builder.Services.AddSingleton<ITokenStorage, LocalStorageTokenStorage>();
+builder.Services.AddTransient<AuthTokenHandler>();
+builder.Services.AddSingleton<AuthService>();
+builder.Services.AddSingleton<AuthenticationStateProvider, JwtAuthStateProvider>();
+builder.Services.AddSingleton<JwtAuthStateProvider>(sp =>
     (JwtAuthStateProvider)sp.GetRequiredService<AuthenticationStateProvider>());
 builder.Services.AddAuthorizationCore();
 
-builder.Services.AddScoped(sp =>
+builder.Services.AddSingleton(sp =>
 {
     var handler = sp.GetRequiredService<AuthTokenHandler>();
     handler.InnerHandler = new HttpClientHandler();
