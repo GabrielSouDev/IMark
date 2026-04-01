@@ -18,9 +18,24 @@ public class TimeCheckService
         _http = http;
     }
 
+    public async Task<List<TimeEntryDTO>> GetAll()
+    {
+        var response = await _http.GetAsync("api/timecheck");
+        var message = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+            throw new HttpRequestException(message, null, response.StatusCode);
+
+        return JsonSerializer.Deserialize<List<TimeEntryDTO>>(message, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        }) ?? new List<TimeEntryDTO>();
+    }
+
+
     public async Task IncludeAsync(TimeCheckRequest request)
     {
-        var response = await _http.PostAsJsonAsync("api/timecheck/include", request);
+        var response = await _http.PostAsJsonAsync("api/timecheck", request);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -41,6 +56,9 @@ public class TimeCheckService
         if (string.IsNullOrWhiteSpace(content))
             return new TimeEntryDTO();
 
-        return JsonSerializer.Deserialize<TimeEntryDTO>(content) ?? new TimeEntryDTO();
+        return JsonSerializer.Deserialize<TimeEntryDTO>(content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        }) ?? new TimeEntryDTO();
     }
 }
