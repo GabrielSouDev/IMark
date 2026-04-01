@@ -1,0 +1,101 @@
+﻿@inject TimeCheckService TimeCheckService
+
+@attribute [Authorize]
+@page "/Geral"
+
+<div class="records-wrap">
+    <table class="table table-sm align-middle mb-0">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Data</th>
+                <th>Horarios</th>
+                <th>Tot. Horas</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="registros">
+            
+                @if (!_timeEntries.Any())
+                {
+                    <tr>
+                        <td colspan="3" class="empty-msg">Nenhum ponto registrado</td>
+                    </tr>
+                }
+                else
+                {
+                @foreach (var (timeEntry, index) in _timeEntries.Select((c, i) => (c, i + 1)))
+                    {
+                        <tr>
+                            <td>@index</td>
+                            <td>@timeEntry.Date</td>
+                            <td>@string.Join(" ", timeEntry.Checks)</td>
+                            <td>@timeEntry.HoursWorked.ToString(@"hh\:mm\:ss")</td>
+                            <td>@(timeEntry.Status == TimeEntryStatus.Inconsistent ? "Inconsistente" : "Valido")</td>
+                        </tr>
+                    }
+                }
+        </tbody>
+    </table>
+</div>
+
+@code{
+    private List<TimeEntryGeneral> _timeEntries = new();
+    private string _errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var timeEntries = await TimeCheckService.GetAll();
+
+        _timeEntries = MapTimeEntryList(timeEntries);
+    }
+
+    private List<TimeEntryGeneral> MapTimeEntryList(IEnumerable<TimeEntryDTO> timeEntries)
+    {
+        var result = new List<TimeEntryGeneral>();
+
+        foreach (var te in timeEntries)
+        {
+            var checksByDate = te.Checks.GroupBy(c => c.Timestamp.Date);
+
+            foreach (var group in checksByDate)
+            {
+                var checksList = group.ToList();
+                var status = checksList.Count % 2 == 0 ? TimeEntryStatus.Valid : TimeEntryStatus.Inconsistent;
+
+                var timeEntryGeneral = new TimeEntryGeneral()
+                {
+                    Id = te.Id,
+                    HoursWorked = CalculateHoursWorked(checksList, status),
+                    Status = status,
+                    Date = group.Key.ToString("dd/MM/yyyy"),
+                    Checks = checksList.Select(c => c.Timestamp.ToString("HH:mm:ss")).ToList()
+                };
+                result.Add(timeEntryGeneral);
+            }
+        }
+
+        return result;
+    }
+
+    private TimeSpan CalculateHoursWorked(List<TimeCheckDTO> checks, TimeEntryStatus status)
+    {
+        var totalHours = TimeSpan.Zero;
+
+        if (checks.Count == 0)
+            return totalHours;
+
+        var timestamps = checks.Select(c => c.Timestamp.TimeOfDay).OrderBy(ts => ts);
+        var checkStack = new Stack<TimeSpan>(timestamps);
+
+        if (status == TimeEntryStatus.Inconsistent)
+            checkStack.Pop();
+
+        for (int i = checkStack.Count; i > 0; i -= 2)
+        {
+            totalHours += checkStack.Pop() - checkStack.Pop();
+        }
+
+        return totalHours;
+    }
+}
