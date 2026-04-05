@@ -1,0 +1,123 @@
+﻿@inject TimeCheckService TimeCheckService
+
+@attribute [Authorize]
+@page "/Ajustar"
+
+
+<div class="d-flex flex-column" >
+
+    @if (!_timeEntries.Any())
+    {
+        <div>
+            <p class="empty-msg">Nenhum ponto registrado</p>
+        </div>
+    }
+    else
+    {
+        <!-- Selector -->
+        <select class="form-select" @onchange="SelectTimeEntry">
+            <option value="@Guid.Empty" selected disabled>Escolha uma data</option>
+            @foreach (var timeEntry in _timeEntries)
+            {
+                <option value="@timeEntry.Id">@timeEntry.Date.ToString()</option>
+            }
+        </select>
+
+        @if (_selectedTimeEntry is not null)
+        {
+            <EditForm Model="_selectedTimeEntry" OnValidSubmit="UpdateAsync" class="card p-4 shadow-sm rounded">
+                <DataAnnotationsValidator />
+
+                @foreach    (var check in _selectedTimeEntry.Checks)
+                {
+                    <div class="mb-3">
+                        <InputDate Type="InputDateType.Time"
+                                   @bind-Value="check.Timestamp"
+                                   class="form-control" />
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(_errorMessage))
+                {
+                    <div class="alert alert-danger small py-2 mb-3" role="alert">
+                        @_errorMessage
+                    </div>
+                }
+
+                <!-- Button -->
+                <div class="btn-wrap">
+                    <button type="submit" class="btn btn-primary w-100 d-flex justify-content-center align-items-center" disabled="@_isLoading">
+                        @if (_isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            <span>Atualizando...</span>
+                        }
+                        else
+                        {
+                            <span>Ajustar Ponto</span>
+                        }
+                    </button>
+                </div>
+            </EditForm>
+
+        }
+    }
+</div>
+
+
+@code{
+    private List<TimeEntryDTO> _timeEntries = new();
+    private TimeEntryDTO? _selectedTimeEntry;
+    private Guid? _selectedTimeEntryId;
+    private string _errorMessage = string.Empty;
+    private bool _isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _timeEntries = await TimeCheckService.GetAllEntriesNoIncludes();
+        _timeEntries.Reverse();
+    }
+
+    private async Task SelectTimeEntry(ChangeEventArgs args)
+    {
+        _selectedTimeEntryId = Guid.Parse(args.Value!.ToString()!);
+
+        if (_selectedTimeEntryId == Guid.Empty)
+        {
+            _errorMessage = "Nenhuma entrada selecionada.";
+            return;
+        }
+
+        _selectedTimeEntry = await TimeCheckService.GetById(_selectedTimeEntryId.Value);
+    }
+
+    private async Task UpdateAsync()
+    {
+        _errorMessage = string.Empty;
+
+        if (_selectedTimeEntryId is null || _selectedTimeEntry is null)
+        {
+            _errorMessage = "Nenhuma entrada selecionada.";
+            return; 
+        }
+
+        _isLoading = true;
+        StateHasChanged();
+        try
+        {
+            var success = await TimeCheckService.UpdateTimeEntryAsync(_selectedTimeEntryId.Value, _selectedTimeEntry);
+
+            if (!success)
+                _errorMessage = "Erro ao atualizar o ponto.";
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Erro inesperado: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+}

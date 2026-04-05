@@ -1,0 +1,97 @@
+/* Clock */
+.clock-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 16px 16px;
+    background: #ffffff;
+    border-bottom: 1px solid #d0daea;
+}
+
+.clock-label {
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #4a6e8a; 
+    margin-bottom: 6px;
+}
+
+.clock-date {
+    font-size: 14px;
+    color: #4a6e8a;
+    margin-top: 2px;
+}
+
+/* Button */
+.btn-wrap {
+    padding: 16px;
+    flex-shrink: 0;
+}
+
+.btn-include {
+    width: 100%;
+    padding: 18px;
+    background: #254875;
+    color: #d6eaff;
+    border-radius: 8px;
+    flex-direction: row;
+    gap: 12px;
+    font-size: 1rem;
+}
+
+.punch-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1.05rem; 
+    letter-spacing: 0.02em;
+    transition: filter 0.15s, transform 0.1s;
+}
+
+    .punch-btn:hover {
+        filter: brightness(1.1);
+    }
+
+    .punch-btn:active {
+        filter: brightness(0.88);
+        transform: scale(0.97);
+    }
+
+.btn-icon {
+    font-size: 2.2rem; 
+    line-height: 1;
+}
+
+/* Records table */
+.records-wrap {
+    padding: 16px;
+    background: #ffffff;
+}
+
+.table > :not(caption) > * > * {
+    border-bottom-color: #d0daea;
+    color: #1e3350;
+    font-size: 14px;
+}
+
+.table thead th {
+    color: #4a6e8a; 
+    font-size: 12px; 
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600; 
+    border-bottom-color: #d0daea;
+}
+
+.empty-msg {
+    text-align: center;
+    color: #6a8faa; 
+    padding: 24px 0;
+    font-size: 15px; 
+}
