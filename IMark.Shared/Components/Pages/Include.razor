@@ -2,7 +2,6 @@
 
 @attribute [Authorize]
 @page "/Incluir"
-@using IMark.Shared.Models.Enums
 
 <div class="d-flex flex-column" >
 
@@ -53,8 +52,8 @@
                     {
                         <tr>
                             <td>@index</td>
-                            <td>@check.Timestamp.ToString("dd/MM/yyyy")</td>
-                            <td>@check.Timestamp.ToString("HH:mm:ss")</td>
+                            <td>@check.Timestamp.ToLocalTime().ToString("dd/MM/yyyy")</td>
+                            <td>@check.Timestamp.ToLocalTime().ToString("HH:mm:ss")</td>
                         </tr>
                     }
                 }
