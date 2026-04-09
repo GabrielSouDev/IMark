@@ -19,7 +19,7 @@
             <option value="@Guid.Empty" selected disabled>Escolha uma data</option>
             @foreach (var timeEntry in _timeEntries)
             {
-                <option value="@timeEntry.Id">@timeEntry.Date.ToString()</option>
+                <option value="@timeEntry.Id" disabled="@(timeEntry.Status == TimeEntryStatus.Pending)">@timeEntry.Date.ToString()</option>
             }
         </select>
 
@@ -32,7 +32,7 @@
                 {
                     <div class="mb-3">
                         <InputDate Type="InputDateType.Time"
-                                   @bind-Value="check.Timestamp"
+                                   @bind-Value="check.TimestampLocal"
                                    class="form-control" />
                     </div>
                 }
@@ -44,6 +44,11 @@
                     </div>
                 }
 
+                <div class="mb-3">
+                    <button type="button" class="btn btn-outline-info btn-sm" @onclick="AddCheck">
+                        + Adicionar horário
+                    </button>
+                </div>
                 <!-- Button -->
                 <div class="btn-wrap">
                     <button type="submit" class="btn btn-primary w-100 d-flex justify-content-center align-items-center" disabled="@_isLoading">
@@ -119,5 +124,13 @@
             _isLoading = false;
             StateHasChanged();
         }
+    }
+    private void AddCheck()
+    {
+        _selectedTimeEntry!.Checks.Add(new TimeCheckDTO
+        {
+            Timestamp = _selectedTimeEntry.Date.ToDateTime(TimeOnly.FromDateTime(DateTime.UtcNow))
+        });
+        StateHasChanged();
     }
 }

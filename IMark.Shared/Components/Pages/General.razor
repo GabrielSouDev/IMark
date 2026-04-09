@@ -30,10 +30,10 @@
                         <tr>
                             <td>@index</td>
                             <td>@timeEntry.Date.ToString()</td>
-                            <td>@string.Join(" ", timeEntry.Checks.Select(c => c.Timestamp.ToLocalTime().ToString("HH:mm:ss")).ToArray())</td>
+                            <td>@string.Join(" ", timeEntry.Checks.OrderBy(c => c.TimestampLocal).Select(c => c.TimestampLocal.ToString("HH:mm:ss")).ToArray())</td>
                             <td>@timeEntry.HoursWorked.ToString(@"hh\:mm\:ss")</td>
                             <td>@(timeEntry.IsConsistent ? "Consistente" : "Inconsistente")</td>
-                            <td>@timeEntry.Status</td>
+                            <td>@(timeEntry.Status == TimeEntryStatus.Accepted ? "Aceito" : "Pendente")</td>
                         </tr>
                     }
                 }
